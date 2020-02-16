@@ -217,6 +217,13 @@ module.exports = class Board {
 			s.isHit = true;
 			if (this.checkIfSunk(s)) {
 				s.isSunk = true;
+				var sunkShips = this.ships.filter(function (s) { return s.isSunk  } );
+				if (sunkShips.length === this.ships.length) {
+					return { "message": "You have won the game! All ships have been sunk.",
+							 "numHits": this.totalHits,
+						     "numMisses": this.totalMisses
+					       }
+				}
 				return { "message" : s.shipType + " " + s.id + " has been sunk!" };
 			}
 			else {
