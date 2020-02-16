@@ -120,6 +120,7 @@ describe('Board', function() {
 	describe('game simulation', function() {
 		it('should be able to place all ships on board and attack them all until the game is won', function() {
 			var b = new Board();
+			b.playingGame = true;
 			b.placeShip('A0',"Battleship", false);
 
 			b.placeShip('A3',"Cruiser", true);

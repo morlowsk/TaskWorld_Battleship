@@ -2,6 +2,7 @@ let Ship = require('./ship.js');
 
 module.exports = class Board {
 	constructor() {
+		this.playingGame = false;
 		this.board = [];
 		for (let i=0; i<10; i++) {
 			this.board[i] = [];
@@ -218,7 +219,7 @@ module.exports = class Board {
 			if (this.checkIfSunk(s)) {
 				s.isSunk = true;
 				var sunkShips = this.ships.filter(function (s) { return s.isSunk  } );
-				if (sunkShips.length === this.ships.length) {
+				if (this.playingGame && sunkShips.length === this.ships.length) {
 					return { "message": "You have won the game! All ships have been sunk.",
 							 "numHits": this.totalHits,
 						     "numMisses": this.totalMisses
