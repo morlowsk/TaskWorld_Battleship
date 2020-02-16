@@ -53,6 +53,25 @@ describe('Board', function() {
 			var message = b.placeShip('C3',"Battleship", false);
 			assert.equal(message["message"], "Cannot place ship of type Battleship at position C3.");
 		});
+
+		it('should be able to place all ships on board in order to start game', function() {
+			var b = new Board();
+			b.placeShip('A0',"Battleship", false);
+
+			b.placeShip('A3',"Cruiser", true);
+			b.placeShip('J3', 'Cruiser', true);
+
+			b.placeShip('A8',"Destroyer", true);
+			b.placeShip('D4', 'Destroyer', false);
+			b.placeShip('G1', 'Destroyer', true);
+
+			b.placeShip('C2', 'Submarine', false);
+			b.placeShip('C7', 'Submarine', true);
+			b.placeShip('E6', 'Submarine', false);
+			var response = b.placeShip('E8', 'Submarine', false);
+
+			assert.equal(response["game_status"], "Game is ready, all ships placed on board.");
+		});
 	});
 
 	describe('attack', function() {

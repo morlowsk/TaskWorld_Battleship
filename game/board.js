@@ -46,10 +46,15 @@ module.exports = class Board {
 		};
 
 		this.ships = [];
-		this.numBattleShips = 4;
+
+		this.numBattleShips = 1;
+		this.battleShipsPlaced = 0;
 		this.numCruisers = 2;
+		this.cruisersPlaced = 0;
 		this.numDestroyers = 3;
-		this.numSubmarines = 3;
+		this.destroyersPlaced = 0;
+		this.numSubmarines = 4;
+		this.submarinesPlaced = 0;
 
 		this.id = 0;
 		this.createId = function () {
@@ -121,7 +126,7 @@ module.exports = class Board {
 				rowStart = x-1 >= 0 ? x-1 : x;
 				rowEnd = x+1 < this.board.length ? x + 1 : x;
 				columnStart = y-1 >= 0 ? y-1 : y;
-				columnEnd = y+size;
+				columnEnd = y+size-1;
 
 				if (columnEnd > this.board[0].length) {
 					return false;
@@ -129,7 +134,7 @@ module.exports = class Board {
 			}
 			else {
 				rowStart = x-1 >= 0 ? x-1 : x;
-				rowEnd = x+size;
+				rowEnd = x+size-1;
 				if (rowEnd > this.board.length) {
 					return false;
 				}
@@ -153,26 +158,45 @@ module.exports = class Board {
 		if (this.canPlace(startPosition, shipType, isHorizontal)) {
 			if (shipType === 'Battleship') {
 				this.place(startPosition, isHorizontal, 4, shipType, 'B');
-				this.numBattleShips--;
+				this.battleShipsPlaced++;
 			}
 			else if (shipType === 'Cruiser') {
 				this.place(startPosition, isHorizontal, 3, shipType, 'C');
-				this.numCruisers--;
+				this.cruisersPlaced++;
 			}
 			else if (shipType === 'Destroyer') {
 				this.place(startPosition, isHorizontal, 2, shipType, 'D');
-				this.numDestroyers--;
+				this.destroyersPlaced++;
 			}
 			else {
 				this.place(startPosition, isHorizontal, 3, shipType, 'S');
-				this.numSubmarines--;
+				this.submarinesPlaced++;
 			}
 		}
 		else {
 			return { "message":  "Cannot place ship of type " + shipType + " at position "+ startPosition + "."};
 		}
 
-		return { "message": "Placed ship of type " + shipType + " at position "+ startPosition + "."};
+		var response = {};
+
+		if (this.numBattleShips === this.battleShipsPlaced
+			&& this.numCruisers === this.cruisersPlaced
+			&& this.numDestroyers === this.destroyersPlaced
+			&& this.numSubmarines === this.submarinesPlaced) {
+			response["game_status"] = "Game is ready, all ships placed on board.";
+		}
+		else {
+			response["game_status"] =
+				{   "message" : "Game is not ready, not enough ships on board yet.",
+				    "battleships": this.battleShipsPlaced + "/" + this.numBattleShips,
+					"cruisers": this.cruisersPlaced + "/" + this.numCruisers,
+					"destroyers": this.destroyersPlaced + "/" + this.numDestroyers,
+					"submarines": this.submarinesPlaced + "/" + this.numSubmarines
+				}
+		}
+
+		response["message"] = "Placed ship of type " + shipType + " at position "+ startPosition + ".";
+		return response;
 	}
 
 	attack(position) {
