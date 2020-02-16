@@ -1,4 +1,4 @@
-class Ship {
+module.exports = class Ship {
 	constructor(id, shipType, isHorizontal, startPosition, size) {
 		this.id = id;
 		this.shipType = shipType;
@@ -6,4 +6,4 @@ class Ship {
 		this.startPosition = startPosition;
 		this.size = size;
 	}
-}
+};

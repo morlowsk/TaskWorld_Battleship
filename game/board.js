@@ -10,6 +10,9 @@ module.exports = class Board {
 			}
 		}
 
+		this.totalHits = 0;
+		this.totalMisses = 0;
+
 		this.positionsToShip = {};
 		this.rowMap = {
 			'A': 0,
@@ -109,36 +112,40 @@ module.exports = class Board {
 				default: size = 3;
 			}
 
-			if (isHorizontal) {
-				if (y+size > this.board[0].length) {
-					return false;
-				}
-				if (this.board[x][y-1] !== '' || this.board[x][y+size] !== '') {
-					return false;
-				}
-				for (let j=y; j < y+size; j++) {
-					if (this.board[x][j] !== '') {
-						return false;
-					}
-				}
+			var rowStart;
+			var rowEnd;
+			var columnStart;
+			var columnEnd;
 
-				return true;
+			if (isHorizontal) {
+				rowStart = x-1 >= 0 ? x-1 : x;
+				rowEnd = x+1 < this.board.length ? x + 1 : x;
+				columnStart = y-1 >= 0 ? y-1 : y;
+				columnEnd = y+size;
+
+				if (columnEnd > this.board[0].length) {
+					return false;
+				}
 			}
 			else {
-				if (x+size > this.board.length) {
+				rowStart = x-1 >= 0 ? x-1 : x;
+				rowEnd = x+size;
+				if (rowEnd > this.board.length) {
 					return false;
 				}
-				if ((x-1 < 0 || this.board[x-1][y] !== '') || this.board[x+size][y] !== '') {
-					return false;
-				}
-				for (let i=x; i < x+size; i++) {
-					if (this.board[i][y] !== '') {
+				columnStart = y-1 >= 0 ? y-1 : y;
+				columnEnd = y+1 < this.board[0].length ? y+1 : y;
+			}
+
+			for (let i=rowStart; i <= rowEnd; i++) {
+				for (let j=columnStart; j <= columnEnd; j++) {
+					if (this.board[i][j] !== '') {
 						return false;
 					}
 				}
-
-				return true;
 			}
+
+			return true;
 		}
 	}
 
@@ -165,7 +172,7 @@ module.exports = class Board {
 			return { "message":  "Cannot place ship of type " + shipType + " at position "+ startPosition + "."};
 		}
 
-		return { "message": "Placed ship of type " + shipType };
+		return { "message": "Placed ship of type " + shipType + " at position "+ startPosition + "."};
 	}
 
 	attack(position) {
@@ -175,11 +182,13 @@ module.exports = class Board {
 
 		//miss
 		if (this.board[x][y] === '' || this.board[x][y] === 'X') {
+			this.totalMisses++;
 			return { "message" : "Missed!" };
 		}
 		//hit
 		else {
 			this.board[x][y] = 'X';
+			this.totalHits++;
 			var s = this.positionsToShip[position];
 			s.isHit = true;
 			if (this.checkIfSunk(s)) {
