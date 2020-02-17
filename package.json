@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "mocha"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -15,9 +15,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^7.0.1"
-  },
-  "scripts": {
-    "test": "mocha"
+    "mocha": "^7.0.1",
+    "supertest": "^4.0.2"
   }
 }
