@@ -56,11 +56,11 @@ function validate(pos, shipType, isHorizontal) {
 	var shipTypes = new Set(["Battleship", "Cruiser", "Destroyer", "Submarine"]);
 
 	if (!shipTypes.has(shipType)) {
-		messages.push("Invalid shipType");
+		messages.push("Invalid shipType.");
 	}
 
 	if (typeof isHorizontal !== "boolean"){
-		messages.push("IsHorizontal is not boolean");
+		messages.push("IsHorizontal is not a boolean.");
 	}
 
 	return messages;

@@ -39,11 +39,11 @@ describe('Game', () => {
 			});
 	});
 
-	it('should return a 400 for a bad request', (done) => {
+	it('should return a 400 for a bad request and the reasons why', (done) => {
 		var req = {
-			"pos": "A0",
+			"pos": "Z0",
 			"shipType": "NOT A SHIP",
-			"isHorizontal": true
+			"isHorizontal": "not a boolean"
 		};
 		request
 			.post('/battleship/place/ship')
@@ -52,7 +52,9 @@ describe('Game', () => {
 			.end((err, response) => {
 				if (err) done(err);
 				expect(response.statusCode).to.equal(400);
-				expect(response.body["messages"][0]).to.equal("Invalid shipType");
+				expect(response.body["messages"][0]).to.equal("Invalid position, letters must be A-J.");
+				expect(response.body["messages"][1]).to.equal("Invalid shipType.");
+				expect(response.body["messages"][2]).to.equal("IsHorizontal is not a boolean.");
 				done();
 			});
 	});
