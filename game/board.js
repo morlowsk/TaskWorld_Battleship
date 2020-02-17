@@ -1,7 +1,9 @@
 let Ship = require('./ship.js');
+let Save = require('./save.js');
 
 module.exports = class Board {
 	constructor() {
+		// stateful part of Board
 		this.playingGame = false;
 		this.board = [];
 		for (let i=0; i<10; i++) {
@@ -10,11 +12,23 @@ module.exports = class Board {
 				this.board[i].push('')
 			}
 		}
-
+		this.ships = [];
+		this.positionsToShip = {};
 		this.totalHits = 0;
 		this.totalMisses = 0;
 
-		this.positionsToShip = {};
+		this.battleShipsPlaced = 0;
+		this.cruisersPlaced = 0;
+		this.destroyersPlaced = 0;
+		this.submarinesPlaced = 0;
+
+		//important constants
+		this.numBattleShips = 1;
+		this.numCruisers = 2;
+		this.numDestroyers = 3;
+		this.numSubmarines = 4;
+
+		// helper maps
 		this.rowMap = {
 			'A': 0,
 			'B': 1,
@@ -26,11 +40,6 @@ module.exports = class Board {
 			'H': 7,
 			'I': 8,
 			'J': 9
-		};
-		this.convert = function(position) {
-			var x = this.rowMap[position[0]];
-			var y = parseInt(position[1]);
-			return [x, y];
 		};
 
 		this.numToRow = {
@@ -46,16 +55,12 @@ module.exports = class Board {
 			9 : 'J'
 		};
 
-		this.ships = [];
-
-		this.numBattleShips = 1;
-		this.battleShipsPlaced = 0;
-		this.numCruisers = 2;
-		this.cruisersPlaced = 0;
-		this.numDestroyers = 3;
-		this.destroyersPlaced = 0;
-		this.numSubmarines = 4;
-		this.submarinesPlaced = 0;
+		//helper functions
+		this.convert = function(position) {
+			var x = this.rowMap[position[0]];
+			var y = parseInt(position[1]);
+			return [x, y];
+		};
 
 		this.id = 0;
 		this.createId = function () {
@@ -82,7 +87,7 @@ module.exports = class Board {
 			}
 		};
 
-		this.place = function(startPosition, isHorizontal, size, shipType, symbol) {
+		this.placeNewShip = function(startPosition, isHorizontal, size, shipType, symbol) {
 			var pos = this.convert(startPosition);
 			var x = pos[0];
 			var y = pos[1];
@@ -98,6 +103,25 @@ module.exports = class Board {
 			else {
 				for (let i=x; i < x+size; i++) {
 					this.board[i][y] = symbol;
+					this.positionsToShip[this.numToRow[i] + y] = ship;
+				}
+			}
+
+			this.ships.push(ship);
+		};
+
+		this.placeExistingShip = function(ship) {
+			var pos = this.convert(ship.startPosition);
+			var x = pos[0];
+			var y = pos[1];
+
+			if (s.isHorizontal) {
+				for (let j=y; j < y+ship.size; j++) {
+					this.positionsToShip[ship.startPosition[0] + j] = ship;
+				}
+			}
+			else {
+				for (let i=x; i < x+ship.size; i++) {
 					this.positionsToShip[this.numToRow[i] + y] = ship;
 				}
 			}
@@ -158,19 +182,19 @@ module.exports = class Board {
 	placeShip(startPosition, shipType, isHorizontal) {
 		if (this.canPlace(startPosition, shipType, isHorizontal)) {
 			if (shipType === 'Battleship') {
-				this.place(startPosition, isHorizontal, 4, shipType, 'B');
+				this.placeNewShip(startPosition, isHorizontal, 4, shipType, 'B');
 				this.battleShipsPlaced++;
 			}
 			else if (shipType === 'Cruiser') {
-				this.place(startPosition, isHorizontal, 3, shipType, 'C');
+				this.placeNewShip(startPosition, isHorizontal, 3, shipType, 'C');
 				this.cruisersPlaced++;
 			}
 			else if (shipType === 'Destroyer') {
-				this.place(startPosition, isHorizontal, 2, shipType, 'D');
+				this.placeNewShip(startPosition, isHorizontal, 2, shipType, 'D');
 				this.destroyersPlaced++;
 			}
 			else {
-				this.place(startPosition, isHorizontal, 3, shipType, 'S');
+				this.placeNewShip(startPosition, isHorizontal, 3, shipType, 'S');
 				this.submarinesPlaced++;
 			}
 		}
@@ -255,5 +279,50 @@ module.exports = class Board {
 			"activeDestroyers": destroyers.length,
 			"activeSubmarines": submarines.length
 		};
+	}
+
+	// Board save and restore logic
+	saveGameSession() {
+		var save = new Save();
+		var serializedBoard = JSON.stringify(this.board);
+		var ships = this.ships.map(function (s) {
+			return { "id": s.id,
+				     "shipType": s.shipType,
+					 "isHorizontal": s.isHorizontal,
+				     "startPosition": s.startPosition,
+					 "size": s.size,
+					 "isHit": s.isHit,
+					 "isSunk": s.isSunk
+				   }
+		});
+		var metadata = { "numHits": this.totalHits,
+						 "numMisses": this.totalMisses,
+			    		 "board": serializedBoard,
+						 "battleShipsPlaced": this.battleShipsPlaced,
+			 			 "cruisersPlaced": this.cruisersPlaced,
+						 "destroyersPlaced": this.destroyersPlaced,
+						 "submarinesPlaced": this.submarinesPlaced
+						};
+		save.writeToDB(ships, metadata);
+	}
+
+	restoreGameSession() {
+		var save = new Save();
+		var result = save.readFromDB();
+		var dbShips = result["ships"];
+		for(let i=0; i < dbShips.length; i++) {
+			var s = dbShips[i];
+			var ship =
+				new Ship(s["id"], s["shipType"], s["isHorizontal"], s["startPosition"], s["size"], s["isHit"], s["isSunk"]);
+			this.placeExistingShip(ship);
+		}
+
+		this.totalMisses = result["metadata"]["numMisses"];
+		this.totalHits = result["metadata"]["numMisses"];
+		this.board = JSON.parse(result["metadata"]["board"]);
+		this.battleShipsPlaced = result["metadata"]["battleShipsPlaced"];
+		this.cruisersPlaced = result["metadata"]["cruisersPlaced"];
+		this.destroyersPlaced = result["metadata"]["destroyersPlaced"];
+		this.submarinesPlaced = result["metadata"]["submarinesPlaced"];
 	}
 };

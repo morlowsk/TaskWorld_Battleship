@@ -68,6 +68,7 @@ describe('Board', function() {
 			b.placeShip('C2', 'Submarine', false);
 			b.placeShip('C7', 'Submarine', true);
 			b.placeShip('E6', 'Submarine', false);
+
 			var response = b.placeShip('E8', 'Submarine', false);
 
 			assert.equal(response["game_status"], "Game is ready, all ships placed on board.");

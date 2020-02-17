@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let Board = require('./../game/board.js');
+let Save = require('./save.js')
 
 var game;
 
@@ -14,7 +15,22 @@ router.get('/status', function(req, res) {
 router.post('/create/game', function(req, res) {
 	game = new Board();
 	game.playingGame = true;
+	var s = new Save();
+	s.createDB();
+	s.createCollectionsInDB();
 	res.send('Created new game with fresh board.');
+});
+
+// save game session
+router.post('/save/game', function(req, res) {
+	game.saveGameSession();
+	res.send('Saved game session.');
+});
+
+// restore game session
+router.post('/restore/game', function(req, res) {
+	game.restoreGameSession();
+	res.send('Restoring game session.');
 });
 
 // place ship

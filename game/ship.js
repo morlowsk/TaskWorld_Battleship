@@ -5,5 +5,7 @@ module.exports = class Ship {
 		this.isHorizontal = isHorizontal;
 		this.startPosition = startPosition;
 		this.size = size;
+		this.isHit = false;
+		this.isSunk = false;
 	}
 };
