@@ -17,6 +17,8 @@ NOTES:
 
 - ship.js just defines a simple class Ship, the way I designed this game the Ship class doesn't have any methods on it and it's all done via Board.
 
+- The last test in board_tests.js is called 'game simulation' and that actually does a golden flow of starting and finishing a game by testing the logic of Board.
+
 Also, the tests should be self documenting via the descriptions.
 
 Enjoy
