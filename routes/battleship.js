@@ -56,7 +56,7 @@ router.post('/place/ship', function(req, res) {
 });
 
 // attack on board
-router.post('/attack', function(req, res) {
+router.post('/attack/ship', function(req, res) {
 	var pos = req.param('pos');
 
 	var response = {};
