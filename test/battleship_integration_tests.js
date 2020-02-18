@@ -12,7 +12,7 @@ describe('Game', () => {
 		request
 			.post('/battleship/create/game')
 			.end((err, response) => {
-				if (err) done(err);
+				if (err) done.fail(err);
 				expect(response.statusCode).to.equal(200);
 				expect(response.text).to.equal("Created new game with fresh board.");
 				done();
@@ -30,7 +30,7 @@ describe('Game', () => {
 			.set('Accept', 'application/json')
 			.send(req)
 			.end((err, response) => {
-				if (err) done(err);
+				if (err) done.fail(err);
 				expect(response.statusCode).to.equal(200);
 				expect(response.body["message"]).to.equal("Placed ship of type Cruiser at position A0.");
 				expect(response.body["game_status"]["message"]).to.equal("Game is not ready, not enough ships on board yet.");
@@ -50,7 +50,7 @@ describe('Game', () => {
 			.set('Accept', 'application/json')
 			.send(req)
 			.end((err, response) => {
-				if (err) done(err);
+				if (err) done.fail(err);
 				expect(response.statusCode).to.equal(400);
 				expect(response.body["messages"][0]).to.equal("Invalid position, letters must be A-J.");
 				expect(response.body["messages"][1]).to.equal("Invalid shipType.");

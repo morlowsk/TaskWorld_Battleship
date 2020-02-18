@@ -282,7 +282,7 @@ module.exports = class Board {
 	}
 
 	// Board save and restore logic
-	saveGameSession() {
+	async saveGameSession() {
 		var save = new Save();
 		var serializedBoard = JSON.stringify(this.board);
 		var ships = this.ships.map(function (s) {
@@ -295,31 +295,31 @@ module.exports = class Board {
 					 "isSunk": s.isSunk
 				   }
 		});
-		var metadata = { "numHits": this.totalHits,
+		var metadata = { "board": serializedBoard,
+						 "numHits": this.totalHits,
 						 "numMisses": this.totalMisses,
-			    		 "board": serializedBoard,
 						 "battleShipsPlaced": this.battleShipsPlaced,
 			 			 "cruisersPlaced": this.cruisersPlaced,
 						 "destroyersPlaced": this.destroyersPlaced,
 						 "submarinesPlaced": this.submarinesPlaced
 						};
-		save.writeToDB(ships, metadata);
+		await save.writeToDB(ships, metadata);
 	}
 
-	restoreGameSession() {
+	async restoreGameSession() {
 		var save = new Save();
-		var result = save.readFromDB();
+		var result = await save.readFromDB();
 		var dbShips = result["ships"];
-		for(let i=0; i < dbShips.length; i++) {
+		for (let i=0; i < dbShips.length; i++) {
 			var s = dbShips[i];
 			var ship =
 				new Ship(s["id"], s["shipType"], s["isHorizontal"], s["startPosition"], s["size"], s["isHit"], s["isSunk"]);
 			this.placeExistingShip(ship);
 		}
 
+		this.board = JSON.parse(result["metadata"]["board"]);
 		this.totalMisses = result["metadata"]["numMisses"];
 		this.totalHits = result["metadata"]["numMisses"];
-		this.board = JSON.parse(result["metadata"]["board"]);
 		this.battleShipsPlaced = result["metadata"]["battleShipsPlaced"];
 		this.cruisersPlaced = result["metadata"]["cruisersPlaced"];
 		this.destroyersPlaced = result["metadata"]["destroyersPlaced"];

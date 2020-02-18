@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let Board = require('./../game/board.js');
-let Save = require('./save.js')
+let Save = require('./save.js');
 
 var game;
 
@@ -12,24 +12,25 @@ router.get('/status', function(req, res) {
 });
 
 // create new game instance
-router.post('/create/game', function(req, res) {
+router.post('/create/game', async function(req, res) {
 	game = new Board();
 	game.playingGame = true;
-	var s = new Save();
-	s.createDB();
-	s.createCollectionsInDB();
+	var client = new Save();
+	await client.deleteCollectionsInDB();
+	await client.createDB();
+	await client.createCollectionsInDB();
 	res.send('Created new game with fresh board.');
 });
 
 // save game session
-router.post('/save/game', function(req, res) {
-	game.saveGameSession();
+router.post('/save/game', async function(req, res) {
+	await game.saveGameSession();
 	res.send('Saved game session.');
 });
 
 // restore game session
-router.post('/restore/game', function(req, res) {
-	game.restoreGameSession();
+router.post('/restore/game', async function(req, res) {
+	await game.restoreGameSession();
 	res.send('Restoring game session.');
 });
 
