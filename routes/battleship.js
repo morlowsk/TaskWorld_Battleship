@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let Board = require('./../game/board.js');
-let Save = require('./save.js');
+let Save = require('./../game/save.js');
 
 var game;
 
@@ -25,12 +25,15 @@ router.post('/create/game', async function(req, res) {
 // save game session
 router.post('/save/game', async function(req, res) {
 	await game.saveGameSession();
+	game = new Board();
+	game.playingGame = false;
 	res.send('Saved game session.');
 });
 
 // restore game session
 router.post('/restore/game', async function(req, res) {
 	await game.restoreGameSession();
+	game.playingGame = true;
 	res.send('Restoring game session.');
 });
 

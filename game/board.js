@@ -115,7 +115,7 @@ module.exports = class Board {
 			var x = pos[0];
 			var y = pos[1];
 
-			if (s.isHorizontal) {
+			if (ship.isHorizontal) {
 				for (let j=y; j < y+ship.size; j++) {
 					this.positionsToShip[ship.startPosition[0] + j] = ship;
 				}
