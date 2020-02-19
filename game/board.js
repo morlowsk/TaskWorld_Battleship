@@ -271,9 +271,14 @@ module.exports = class Board {
 			.filter(function (s) { return s.shipType === "Submarine"})
 			.filter(function (s) { return !s.isSunk  } );
 
-		var sunkShips = this.ships.filter(function (s) { return s.isSunk  } );
+		var sunkShips = this.ships.filter(function (s) { return s.isSunk  } ).map(function (s) { return s.id });
+		var hitShips = this.ships.filter(function (s) { return s.isHit && !s.isSunk  } ).map(function (s) { return s.id });
+
 		return {
 			"numSunkShips": sunkShips.length,
+			"sunkShips": sunkShips,
+			"numHitShips": hitShips.length,
+			"hitShips": hitShips,
 			"activeBattleShips": battleShips.length,
 			"activeCruisers": cruisers.length,
 			"activeDestroyers": destroyers.length,
